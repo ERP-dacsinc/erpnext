@@ -507,7 +507,8 @@ def depreciate_asset(asset_doc, date, notes):
 	make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date)
 
 	asset_doc.reload()
-	cancel_depreciation_entries(asset_doc, date)
+	if not frappe.flags.is_composite_component:
+		cancel_depreciation_entries(asset_doc, date)
 
 
 @erpnext.allow_regional
@@ -536,6 +537,7 @@ def modify_depreciation_schedule_for_asset_repairs(asset, notes):
 	for repair in asset_repairs:
 		if repair.increase_in_asset_life:
 			asset_repair = frappe.get_doc("Asset Repair", repair.name)
+			asset_repair.asset_doc = asset
 			asset_repair.modify_depreciation_schedule()
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset, notes)
 

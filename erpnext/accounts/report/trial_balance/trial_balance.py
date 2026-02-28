@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
+	get_cost_centers_with_children,
 	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
@@ -82,7 +83,7 @@ def validate_filters(filters):
 
 def get_data(filters):
 	accounts = frappe.db.sql(
-		"""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
+		"""select name, account_number, parent_account, account_name, root_type, report_type, is_group, lft, rgt
 
 		from `tabAccount` where company=%s order by lft""",
 		filters.company,
@@ -102,10 +103,6 @@ def get_data(filters):
 	gl_entries_by_account = {}
 
 	opening_balances = get_opening_balances(filters, ignore_is_opening)
-
-	# add filter inside list so that the query in financial_statements.py doesn't break
-	if filters.project:
-		filters.project = [filters.project]
 
 	set_gl_entries_by_account(
 		filters.company,
@@ -270,18 +267,12 @@ def get_opening_balance(
 			opening_balance = opening_balance.where(closing_balance.voucher_type != "Period Closing Voucher")
 
 	if filters.cost_center:
-		lft, rgt = frappe.db.get_value("Cost Center", filters.cost_center, ["lft", "rgt"])
-		cost_center = frappe.qb.DocType("Cost Center")
 		opening_balance = opening_balance.where(
-			closing_balance.cost_center.isin(
-				frappe.qb.from_(cost_center)
-				.select("name")
-				.where((cost_center.lft >= lft) & (cost_center.rgt <= rgt))
-			)
+			closing_balance.cost_center.isin(get_cost_centers_with_children(filters.get("cost_center")))
 		)
 
 	if filters.project:
-		opening_balance = opening_balance.where(closing_balance.project == filters.project)
+		opening_balance = opening_balance.where(closing_balance.project.isin(filters.project))
 
 	if frappe.db.count("Finance Book"):
 		if filters.get("include_default_book_entries"):
@@ -402,13 +393,14 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
 			"currency": company_currency,
+			"is_group_account": d.is_group,
 			"account_name": (
 				f"{d.account_number} - {d.account_name}" if d.account_number else d.account_name
 			),
 		}
 
 		for key in value_fields:
-			row[key] = flt(d.get(key, 0.0), 3)
+			row[key] = flt(d.get(key, 0.0))
 
 			if abs(row[key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
@@ -418,6 +410,10 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 		data.append(row)
 
 	total_row = calculate_total_row(accounts, company_currency)
+
+	if not filters.get("show_group_accounts"):
+		data = hide_group_accounts(data)
+
 	data.extend([{}, total_row])
 
 	return data
@@ -497,3 +493,12 @@ def prepare_opening_closing(row):
 			row[valid_col] = 0.0
 		else:
 			row[reverse_col] = 0.0
+
+
+def hide_group_accounts(data):
+	non_group_accounts_data = []
+	for d in data:
+		if not d.get("is_group_account"):
+			d.update(indent=0)
+			non_group_accounts_data.append(d)
+	return non_group_accounts_data

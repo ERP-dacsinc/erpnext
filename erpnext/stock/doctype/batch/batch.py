@@ -158,13 +158,22 @@ class Batch(Document):
 
 	@frappe.whitelist()
 	def recalculate_batch_qty(self):
-		batches = get_batch_qty(batch_no=self.name, item_code=self.item)
+		batches = get_batch_qty(
+			batch_no=self.name,
+			item_code=self.item,
+			for_stock_levels=True,
+			consider_negative_batches=True,
+			ignore_reserved_stock=True,
+		)
+
 		batch_qty = 0.0
 		if batches:
 			for row in batches:
 				batch_qty += row.get("qty")
 
-		self.db_set("batch_qty", batch_qty)
+		if self.batch_qty != batch_qty:
+			self.db_set("batch_qty", batch_qty)
+
 		frappe.msgprint(_("Batch Qty updated to {0}").format(batch_qty), alert=True)
 
 	def set_batchwise_valuation(self):
@@ -236,6 +245,7 @@ def get_batch_qty(
 	for_stock_levels=False,
 	consider_negative_batches=False,
 	do_not_check_future_batches=False,
+	ignore_reserved_stock=False,
 ):
 	"""Returns batch actual qty if warehouse is passed,
 	        or returns dict of qty by warehouse if warehouse is None
@@ -260,10 +270,12 @@ def get_batch_qty(
 			"posting_date": posting_date,
 			"posting_time": posting_time,
 			"batch_no": batch_no,
+			"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			"ignore_voucher_nos": ignore_voucher_nos,
 			"for_stock_levels": for_stock_levels,
 			"consider_negative_batches": consider_negative_batches,
 			"do_not_check_future_batches": do_not_check_future_batches,
+			"ignore_reserved_stock": ignore_reserved_stock,
 		}
 	)
 
