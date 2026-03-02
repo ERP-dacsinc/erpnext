@@ -356,7 +356,7 @@ erpnext.PointOfSale.Controller = class {
 				get_frm: () => this.frm,
 
 				toggle_item_selector: (minimize) => {
-					this.item_selector.resize_selector(minimize);
+					this.item_selector.toggle_component(!minimize);
 					this.cart.toggle_numpad(minimize);
 				},
 
@@ -376,7 +376,6 @@ erpnext.PointOfSale.Controller = class {
 
 				highlight_cart_item: (item) => {
 					const cart_item = this.cart.get_cart_item(item);
-					this.cart.toggle_item_highlight(cart_item);
 				},
 
 				item_field_focused: (fieldname) => {

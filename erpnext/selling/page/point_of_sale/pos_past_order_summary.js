@@ -94,11 +94,63 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				</div>`;
 	}
 
+	// get_item_html(doc, item_data) {
+	// 	return `<div class="item-row-wrapper">
+	// 				<div class="item-name">${item_data.item_name}</div>
+	// 				<div class="item-qty">${item_data.qty || 0} ${item_data.uom}</div>
+	// 				<div class="item-rate-disc">${get_rate_discount_html()}</div>
+	// 			</div>`;
+
+	// 	function get_rate_discount_html() {
+	// 		if (item_data.rate && item_data.price_list_rate && item_data.rate !== item_data.price_list_rate) {
+	// 			return `<span class="item-disc">(${item_data.discount_percentage}% off)</span>
+	// 					<div class="item-rate">${format_currency(item_data.rate, doc.currency)}</div>`;
+	// 		} else {
+	// 			return `<div class="item-rate">${format_currency(
+	// 				item_data.price_list_rate || item_data.rate,
+	// 				doc.currency
+	// 			)}</div>`;
+	// 		}
+	// 	}
+	// }
+
 	get_item_html(doc, item_data) {
-		return `<div class="item-row-wrapper">
-					<div class="item-name">${item_data.item_name}</div>
-					<div class="item-qty">${item_data.qty || 0} ${item_data.uom}</div>
-					<div class="item-rate-disc">${get_rate_discount_html()}</div>
+		// INLINE CSS FIX: Added flexbox to put everything on one line
+		return `<div class="item-row-wrapper" style="
+					display: flex !important;
+					flex-direction: row !important;
+					justify-content: space-between !important;
+					align-items: center !important;
+					padding: 10px 15px !important;
+					border-bottom: 1px solid #f0f0f0 !important;
+					background: transparent !important;
+				">
+					<!-- COLUMN 1: NAME -->
+					<div class="item-name" style="
+						flex: 2 !important;
+						text-align: left !important;
+						font-weight: 500 !important;
+						font-size: 13px !important;
+						color: #3b4249 !important;
+					">${item_data.item_name}</div>
+
+					<!-- COLUMN 2: QUANTITY -->
+					<div class="item-qty" style="
+						flex: 1 !important;
+						text-align: right !important;
+						color: #6c757d !important;
+						font-size: 13px !important;
+						padding-right: 15px !important;
+					">${item_data.qty || 0} ${item_data.uom}</div>
+
+					<!-- COLUMN 3: RATE / DISCOUNT -->
+					<div class="item-rate-disc" style="
+						flex: 1 !important;
+						text-align: right !important;
+						font-weight: 700 !important;
+						font-size: 13.5px !important;
+						color: #1f272e !important;
+					">${get_rate_discount_html()}</div>
 				</div>`;
 
 		function get_rate_discount_html() {
@@ -374,12 +426,35 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		});
 	}
 
+	// attach_items_info(doc) {
+	// 	this.$items_container.html("");
+	// 	doc.items.forEach((item) => {
+	// 		const item_dom = this.get_item_html(doc, item);
+	// 		this.$items_container.append(item_dom);
+	// 		this.set_dynamic_rate_header_width();
+	// 	});
+	// }
+
 	attach_items_info(doc) {
 		this.$items_container.html("");
-		doc.items.forEach((item) => {
+		
+		// This styles the background and rounded corners for the whole ITEM LIST
+		this.$items_container.css({
+			"background-color": "#f2f4f6", // Unified grey background
+			"border-radius": "10px",       // Single card rounding
+			"margin-bottom": "20px",
+			"border": "1px solid #ebedef",
+			"overflow": "hidden"
+		});
+
+		doc.items.forEach((item, index) => {
 			const item_dom = this.get_item_html(doc, item);
 			this.$items_container.append(item_dom);
-			this.set_dynamic_rate_header_width();
+
+			// Logic to hide the divider for the last item in the list
+			if (index === doc.items.length - 1) {
+				this.$items_container.find('.item-row-wrapper').last().css('border-bottom', 'none');
+			}
 		});
 	}
 
