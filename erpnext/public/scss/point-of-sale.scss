@@ -2569,49 +2569,45 @@
 
 					> .item-row-wrapper {
 						display: flex;
-						gap: 2px;
-						flex-direction: column;
+						align-items: center;
+						justify-content: space-between;
 						padding: var(--padding-sm) var(--padding-md);
-						border: 1px solid lightgray;
-						border-radius: 10px;
-						background: var(--bg-light-gray);
+						border-bottom: 1px solid var(--gray-300);
 
-						> .item-row-data {
-							display: flex;
-							align-items: center;
-
-							> .item-name {
-								@extend .nowrap;
-								font-weight: 500;
-								margin-right: var(--margin-md);
-							}
-
-							> .item-qty {
-								font-weight: 500;
-								margin-left: auto;
-								font-size: small;
-							}
-
-							> .item-rate-disc {
-								display: flex;
-								text-align: right;
-								margin-left: var(--margin-md);
-								justify-content: flex-end;
-								font-size: small;
-
-								> .item-disc {
-									color: var(--dark-green-500);
-								}
-
-								> .item-rate {
-									font-weight: 500;
-									margin-left: var(--margin-md);
-								}
-							}
+						&:last-child {
+							border-bottom: none;
 						}
 
-						> .item-row-refund {
-							font-size: x-small;
+						> .item-name {
+							@extend .nowrap;
+							flex: 2;
+							font-weight: 500;
+							margin-right: var(--margin-md);
+						}
+
+						> .item-qty {
+							flex: 1;
+							text-align: right;
+							color: var(--text-light);
+							font-size: var(--text-sm);
+							margin-right: var(--margin-md);
+						}
+
+						> .item-rate-disc {
+							flex: 1;
+							display: flex;
+							text-align: right;
+							justify-content: flex-end;
+							font-weight: 500;
+
+							> .item-disc {
+								color: var(--dark-green-500);
+								margin-right: var(--margin-sm);
+							}
+
+							> .item-rate {
+								font-weight: 500;
+							}
 						}
 					}
 
