@@ -376,6 +376,17 @@ def get_past_order_list(search_term, status, limit=20):
 
 
 @frappe.whitelist()
+def get_customer_recent_transactions(customer, limit=20):
+	return frappe.db.get_list(
+		"POS Invoice",
+		filters={"customer": customer, "docstatus": 1},
+		fields=["name", "grand_total", "currency", "status", "posting_date", "posting_time"],
+		order_by="posting_date desc, posting_time desc",
+		limit=limit,
+	)
+
+
+@frappe.whitelist()
 def set_customer_info(fieldname, customer, value=""):
 	if fieldname == "loyalty_program":
 		frappe.db.set_value("Customer", customer, "loyalty_program", value)

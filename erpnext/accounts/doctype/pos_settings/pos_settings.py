@@ -12,12 +12,12 @@ class POSSettings(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.accounts.doctype.pos_field.pos_field import POSField
 		from erpnext.accounts.doctype.pos_search_fields.pos_search_fields import POSSearchFields
+		from frappe.types import DF
 
 		invoice_fields: DF.Table[POSField]
+		invoice_type: DF.Literal["POS Invoice", "Sales Invoice"]
 		pos_search_fields: DF.Table[POSSearchFields]
 	# end: auto-generated types
 

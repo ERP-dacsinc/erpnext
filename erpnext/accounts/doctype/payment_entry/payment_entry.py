@@ -369,6 +369,7 @@ class PaymentEntry(AccountsController):
 
 			# if no payment template is used by invoice and has a custom term(no `payment_term`), then invoice outstanding will be in 'None' key
 			latest = latest.get(d.payment_term) or latest.get(None)
+			
 			# The reference has already been fully paid
 			if not latest:
 				frappe.throw(
