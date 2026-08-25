@@ -736,7 +736,7 @@ make_search_bar() {
 		df: {
 			label: __("Search"),
 			fieldtype: "Data",
-			placeholder: __("Search by name, code or fragment..."),
+			placeholder: __("Search by name, code..."),
 		},
 		parent: this.$component.find(".search-field"),
 		render_input: true,

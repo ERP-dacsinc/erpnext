@@ -39,9 +39,8 @@ class PickList(TransactionBase):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
+		from frappe.types import DF
 
 		amended_from: DF.Link | None
 		company: DF.Link
