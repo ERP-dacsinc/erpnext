@@ -700,21 +700,19 @@ erpnext.PointOfSale.Controller = class {
 		frappe.utils.play_sound("error");
 	}
 
-	get_item_from_frm({ name, item_code, batch_no, uom, rate }) {
+	get_item_from_frm({ name, item_code, batch_no }) {
 		let item_row = null;
 		if (name) {
 			item_row = this.frm.doc.items.find((i) => i.name == name);
 		} else {
-			// if item is clicked twice from item selector
-			// then "item_code, batch_no, uom, rate" will help in getting the exact item
-			// to increase the qty by one
+			// if item is clicked twice from item selector, match on item_code (and
+			// batch_no, if any) so the existing row's qty is incremented instead of
+			// adding a duplicate row — even if its uom/rate were edited since it was added
 			const has_batch_no = batch_no !== "null" && batch_no !== null;
 			item_row = this.frm.doc.items.find(
 				(i) =>
 					i.item_code === item_code &&
-					(!has_batch_no || (has_batch_no && i.batch_no === batch_no)) &&
-					i.uom === uom &&
-					i.price_list_rate === flt(rate)
+					(!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 			);
 		}
 
